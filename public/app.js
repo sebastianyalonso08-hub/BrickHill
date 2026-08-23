@@ -5,13 +5,24 @@ document.addEventListener("click",e=>{let b=e.target.closest("[data-page]");if(b
 async function api(url,opt){let r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Request failed");return d}
 function esc(x){return String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderAccount(){document.getElementById("logoutTop").style.display=me?"block":"none";document.getElementById("welcomeName").textContent=me?me.username:"Guest";document.getElementById("homeUser").textContent=me?me.username:"Guest";document.getElementById("homeBricks").textContent=me?me.bricks:0;document.getElementById("miniUser").innerHTML=me?`<b>${esc(me.username)}</b><div class="coins">🧱 ${me.bricks}　★ 0</div>`:"<b>Welcome!</b><div class='coins'>🧱 0　★ 0</div>"}
-async function loadHome(){try{let d=await api("/api/games");document.getElementById("featured").innerHTML=d.games.slice(0,3).map(g=>`<div class="game-card"><div class="thumb"></div><div><h3>${esc(g.name)}</h3><p>${esc(g.description)}</p><p>by ${esc(g.creator)}</p></div><button class="playbtn" data-play="${g.id}">Play</button></div>`).join("")}catch{}}
-async function loadGames(){try{let d=await api("/api/games");document.getElementById("gamesList").innerHTML=d.games.map(g=>`<div class="game-card"><div class="thumb"></div><div><h3>${esc(g.name)}</h3><p>${esc(g.description)}</p><p>by ${esc(g.creator)} · ${g.players} playing</p></div><button class="playbtn" data-play="${g.id}">Play</button></div>`).join("")}catch{}}
+async function loadHome(){try{let d=await api("/api/games");document.getElementById("featured").innerHTML=d.games.slice(0,3).map(g=>`<div class="game-card"><div class="thumb"></div><div><h3>${esc(g.name)}</h3><p>${esc(g.description)}</p><p>by ${esc(g.creator)} · ${g.players||0} playing</p></div><button class="playbtn" data-play="${esc(g.id)}">Play</button></div>`).join("")}catch{}}
+async function loadGames(){try{let d=await api("/api/games");document.getElementById("gamesList").innerHTML=d.games.map(g=>`<div class="game-card"><div class="thumb"></div><div><h3>${esc(g.name)}</h3><p>${esc(g.description)}</p><p>by ${esc(g.creator)} · ${g.players||0} playing</p></div><button class="playbtn" data-play="${esc(g.id)}">Play</button></div>`).join("")}catch{}}
 async function loadProfile(){let b=document.getElementById("profileBox");if(!me){b.innerHTML=`Please log in. <button class="tinybtn" data-page="login">Login</button>`;return}document.getElementById("profileName").textContent=me.username;b.innerHTML=`<b>${esc(me.username)}</b><br>ID: ${esc(me.id)}<br>Bricks: ${me.bricks}<br><br><button class="tinybtn">Send Message</button> <button class="tinybtn">Add Friend</button>`}
 document.getElementById("register").onclick=async()=>{try{await api("/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:document.getElementById("registerName").value})});await refresh();go("home")}catch(e){document.getElementById("registerError").textContent=e.message}}
 document.getElementById("login").onclick=async()=>{try{await api("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:document.getElementById("loginName").value})});await refresh();go("home")}catch(e){document.getElementById("loginError").textContent=e.message}}
 document.getElementById("logoutTop").onclick=async()=>{await api("/api/logout",{method:"POST"});me=null;renderAccount();go("home")}
 document.getElementById("publish").onclick=async()=>{try{await api("/api/games",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:document.getElementById("gameName").value,description:document.getElementById("gameDesc").value})});document.getElementById("gameName").value="";document.getElementById("gameDesc").value="";loadGames()}catch(e){document.getElementById("gameError").textContent=e.message}}
-document.addEventListener("click",e=>{let p=e.target.closest("[data-play]");if(p){go("client");alert("Game selected: "+p.dataset.play+"\nThe Windows launcher will start Brick_Hill_Multiplayer.exe in the next integration step.")}})
+async function launchGame(gameId){
+  if(!me){go("login");return}
+  try{
+    const d=await api("/api/client/launch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gameId})});
+    go("client");
+    const status=document.getElementById("clientStatus");
+    if(status) status.textContent=`Starting ${d.game.name}…`;
+    // Registered by install-brickhill.ps1 on Windows. This starts the unchanged game EXE.
+    window.location.href=d.scheme;
+  }catch(e){go("client");const status=document.getElementById("clientStatus");if(status)status.textContent=e.message}
+}
+document.addEventListener("click",e=>{let p=e.target.closest("[data-play]");if(p)launchGame(p.dataset.play)});
 async function refresh(){let d=await api("/api/me");me=d.user;renderAccount();loadHome();loadGames();loadProfile()}
 refresh();
