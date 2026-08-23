@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brick Hill</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="topline"></div>
+<header><div class="header-main">
+  <button class="logo" data-page="home">Brick Hill</button>
+  <div class="user-mini" id="miniUser"><b>Welcome!</b><div class="coins">🧱 0　★ 0</div></div>
+</div>
+<div class="nav">
+  <button data-page="home">You</button>
+  <button data-page="profile">Avatar</button>
+  <button data-page="games">Play</button>
+  <button data-page="catalog">Shop</button>
+  <button data-page="users">Clans</button>
+  <button data-page="users">Search</button>
+  <button data-page="forum">Forum</button>
+  <button data-page="users">Membership</button>
+  <span class="spacer"></span><button class="logout" id="logoutTop">Logout</button>
+</div></header><div class="orangebar"></div><main>
+<section id="home" class="page active">
+  <div class="subbar">Welcome, <b id="welcomeName">Guest</b></div>
+  <div class="columns">
+    <div class="left">
+      <div class="box profile">
+        <div class="username" id="homeUser">Guest</div>
+        <div class="avatar">
+          <div class="hat"></div><div class="head face"></div>
+          <div class="arm l"></div><div class="arm r"></div><div class="torso"></div>
+          <div class="leg l"></div><div class="leg r"></div>
+        </div>
+        <div class="actions"><button class="tinybtn" data-page="profile">View Profile</button><button class="tinybtn" data-page="profile">Avatar</button></div>
+      </div>
+      <div class="box">
+        <div class="box-title">Stats</div>
+        <div class="stats"><b>Stats</b><div>Posts: 0</div><div>Profile Views: 0</div><div>Bricks: <span id="homeBricks">0</span></div></div>
+      </div>
+    </div>
+    <div class="middle">
+      <div class="box">
+        <div class="box-title">Games</div>
+        <div id="featured" class="games-empty">This user has no games</div>
+      </div>
+      <div class="box">
+        <div class="box-title">About Brick Hill</div>
+        <div class="box-body">Build, play and share blocky games with the community.</div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="box">
+        <div class="box-title">Friends</div>
+        <div class="friends">
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>stan</div>
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>Bannana</div>
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>Bag</div>
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>Isaiah</div>
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>NPC</div>
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>Executive...</div>
+          <div class="friend"><div class="favatar"><i class="fhead"></i><i class="fbody"></i><i class="fleg fl"></i><i class="fleg fr"></i></div>Trash</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="games" class="page">
+  <div class="subbar"><b>Games</b> · Discover experiences</div>
+  <div class="box"><div class="box-title">Create Game</div><div class="createbox">
+    <input id="gameName" placeholder="Game name"><textarea id="gameDesc" placeholder="Description"></textarea>
+    <button class="playbtn" id="publish">Create Game</button> <span id="gameError" class="err"></span>
+  </div></div>
+  <div id="gamesList" class="box"></div>
+</section>
+<section id="catalog" class="page">
+  <div class="subbar"><b>Shop</b> · Catalog</div>
+  <div class="box"><div class="box-title">Catalog</div><div class="catalog">
+    <article class="itemcard"><div class="itemicon">🎩</div><h3>Classic Hat</h3><p>25 Bricks</p><button class="tinybtn">View</button></article>
+    <article class="itemcard"><div class="itemicon">😎</div><h3>Cool Face</h3><p>40 Bricks</p><button class="tinybtn">View</button></article>
+    <article class="itemcard"><div class="itemicon">🧢</div><h3>Brick Cap</h3><p>60 Bricks</p><button class="tinybtn">View</button></article>
+  </div></div>
+</section>
+<section id="users" class="page"><div class="subbar"><b>Users</b></div><div class="box"><div class="box-title">Community</div><div class="box-body">User search, clans and membership will be expanded here.</div></div></section>
+<section id="forum" class="page"><div class="subbar"><b>Forum</b></div><div class="box"><div class="box-title">Forum</div><div class="box-body">Welcome to the Brick Hill community forum.</div></div></section>
+<section id="login" class="page"><div class="formbox"><div class="box-title">Login</div><input id="loginName" placeholder="Username"><button class="playbtn" id="login">Login</button><p id="loginError" class="err"></p><p>New here? <button class="textbtn" data-page="register">Register</button></p></div></section>
+<section id="register" class="page"><div class="formbox"><div class="box-title">Register</div><input id="registerName" placeholder="Username"><button class="playbtn" id="register">Register</button><p id="registerError" class="err"></p><p>Already registered? <button class="textbtn" data-page="login">Login</button></p></div></section>
+<section id="profile" class="page"><div class="subbar"><b>Profile</b></div><div class="box"><div class="box-title" id="profileName">Profile</div><div id="profileBox" class="box-body"></div></div></section>
+<section id="client" class="page"><div class="subbar"><b>Brick Hill Client</b></div><div class="box"><div class="box-title">Play</div><div class="box-body">The classic Windows client is ready to be connected through the launcher.</div></div></section></main><footer><b>Brick Hill</b><span>Revival V1</span><span>Classic-style community website</span></footer>
+<script src="/app.js"></script>
+</body>
+</html>
