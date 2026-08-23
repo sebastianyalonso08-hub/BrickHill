@@ -1,13 +1,14 @@
 {
   "name": "brickhill-website-v1",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^5.1.0",
-    "express-session": "^1.18.2"
+    "express-session": "^1.18.2",
+    "ws": "^8.18.3"
   },
   "engines": {
     "node": ">=24 <25"
