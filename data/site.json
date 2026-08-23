@@ -1,0 +1,32 @@
+{
+  "users": {},
+  "games": [
+    {
+      "id": "1001",
+      "name": "Brick Hill Classic",
+      "creator": "Brick Hill",
+      "players": 0,
+      "visits": 0,
+      "description": "A classic Brick Hill experience.",
+      "featured": true
+    },
+    {
+      "id": "1002",
+      "name": "Brick Obby",
+      "creator": "Brick Hill",
+      "players": 0,
+      "visits": 0,
+      "description": "Jump across a world of bricks.",
+      "featured": true
+    },
+    {
+      "id": "1003",
+      "name": "Build & Chill",
+      "creator": "Brick Hill",
+      "players": 0,
+      "visits": 0,
+      "description": "Build something and hang out.",
+      "featured": false
+    }
+  ]
+}
