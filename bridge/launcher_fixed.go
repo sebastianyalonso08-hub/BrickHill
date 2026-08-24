@@ -19,6 +19,42 @@ type redeemResp struct { OK bool `json:"ok"`; User struct{Username string `json:
 
 func msg(title, text string) { dll:=syscall.NewLazyDLL("user32.dll"); p:=dll.NewProc("MessageBoxW"); t,_:=syscall.UTF16PtrFromString(title); m,_:=syscall.UTF16PtrFromString(text); p.Call(0,uintptr(unsafe.Pointer(m)),uintptr(unsafe.Pointer(t)),0x10) }
 func logLine(s string){ p:=filepath.Join(os.TempDir(),"BrickHillLauncher.log"); f,_:=os.OpenFile(p,os.O_CREATE|os.O_WRONLY|os.O_APPEND,0644); if f!=nil { defer f.Close(); fmt.Fprintf(f,"%s %s\n",time.Now().Format(time.RFC3339),s) } }
+
+var user32 = syscall.NewLazyDLL("user32.dll")
+var procEnumWindows = user32.NewProc("EnumWindows")
+var procGetWindowThreadProcessId = user32.NewProc("GetWindowThreadProcessId")
+var procSetForegroundWindow = user32.NewProc("SetForegroundWindow")
+var procShowWindow = user32.NewProc("ShowWindow")
+var procSendInput = user32.NewProc("SendInput")
+
+type input struct { typ uint32; mi mouseInput; }
+type mouseInput struct { dx,dy int32; mouseData,flags,time uint32; extra uintptr }
+type keyInput struct { wVk,wScan uint16; dwFlags,time uint32; dwExtraInfo uintptr }
+func key(vk uint16, flags uint32) input { return input{typ:1, mi:mouseInput{}} }
+// INPUT on 32-bit Windows is 28 bytes for keyboard input; keep this helper minimal by using SendMessage-style keybd_event.
+var procKeybdEvent = user32.NewProc("keybd_event")
+func press(vk byte){ procKeybdEvent.Call(uintptr(vk),0,0,0); procKeybdEvent.Call(uintptr(vk),0,2,0) }
+func typeText(s string){ for _,r:=range s { if r>='a'&&r<='z' { press(byte(r-'a')+0x41) } else if r>='A'&&r<='Z' { press(byte(r)) } else if r>='0'&&r<='9' { press(byte(r)) } else if r=='_' { press(0xBD) } } }
+func findWindowForPID(pid uint32) uintptr {
+ var found uintptr
+ cb:=syscall.NewCallback(func(hwnd uintptr,lparam uintptr) uintptr { var p uint32; procGetWindowThreadProcessId.Call(hwnd,uintptr(unsafe.Pointer(&p))); if p==pid { found=hwnd; return 0 }; return 1 })
+ procEnumWindows.Call(cb,0); return found
+}
+func autoJoin(pid uint32, username string){
+ for i:=0;i<30;i++ { hwnd:=findWindowForPID(pid); if hwnd!=0 { procShowWindow.Call(hwnd,5); procSetForegroundWindow.Call(hwnd); time.Sleep(700*time.Millisecond)
+    // Expected legacy startup: IP field focused, then username, Host, Join.
+    press(0x09) // TAB: leave IP blank and focus username
+    typeText(username)
+    press(0x09) // Host
+    press(0x09) // Join
+    press(0x0D) // ENTER
+    logLine("auto-join keyboard sequence sent")
+    return }
+    time.Sleep(500*time.Millisecond)
+ }
+ logLine("auto-join failed: game window not found")
+}
+
 func main(){
   if len(os.Args)<2 { msg("Brick Hill Launcher","This launcher must be opened by the Brick Hill website.\n\nIf you are installing the client, run BrickHillInstaller.exe first."); return }
   raw:=os.Args[1]; u,err:=url.Parse(raw); if err!=nil || u.Scheme!="brickhill" { logLine("invalid URI: "+raw); msg("Brick Hill Launcher","Invalid Brick Hill launch link."); return }
@@ -35,4 +71,5 @@ func main(){
   time.Sleep(500*time.Millisecond)
   g:=exec.Command(gameExe); g.Dir=dir; g.Env=append(os.Environ(),"BRICKHILL_GAME="+game,"BRICKHILL_USER="+out.User.Username,"BRICKHILL_LOCAL_SERVER=127.0.0.1:6510"); if err=g.Start();err!=nil {msg("Brick Hill Launcher","Could not start Brick Hill.\n\n"+err.Error());return}
   logLine("game started pid="+fmt.Sprint(g.Process.Pid));
+  autoJoin(uint32(g.Process.Pid), out.User.Username);
 }

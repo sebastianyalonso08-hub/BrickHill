@@ -24,7 +24,7 @@ __declspec(dllexport) int WINAPI connect(void*s,const void*addr,int len){
     PFN_getsockopt gs=(PFN_getsockopt)fn("getsockopt"); int typ=0,tl=sizeof(typ);
     if(gs && gs(s,0xffff,0x1008,(char*)&typ,&tl)==0 && typ==1){
       unsigned char a[32]; for(int i=0;i<len;i++)a[i]=((const unsigned char*)addr)[i];
-      a[2]=0x19; a[3]=0x66; a[4]=127; a[5]=0; a[6]=0; a[7]=1;
+      a[2]=0x19; a[3]=0x6E; a[4]=127; a[5]=0; a[6]=0; a[7]=1;
       return real(s,a,len);
     }
   }
