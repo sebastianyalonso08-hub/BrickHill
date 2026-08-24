@@ -1,1 +1,1 @@
-17.0.0-auto-join-foundation
+18.0.0-3games-routing
