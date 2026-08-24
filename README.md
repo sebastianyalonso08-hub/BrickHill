@@ -41,3 +41,10 @@ Free web services also spin down after 15 minutes without inbound traffic, so th
 Then open:
 
     http://localhost:3000
+
+
+## Si Play no abre el cliente
+
+El navegador no puede ejecutar un `.exe` directamente. Primero hay que registrar el protocolo `brickhill://` en Windows ejecutando `install-brickhill.ps1` como usuario normal. Después vuelve al sitio y pulsa Play.
+
+El sitio incluye `/api/client/installer` para descargar el instalador si todavía no lo tienes.
