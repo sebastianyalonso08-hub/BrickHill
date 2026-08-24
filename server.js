@@ -28,8 +28,22 @@ const tickets=new Map();
 const connections=new Map();
 const rooms=new Map();
 function token(){return crypto.randomBytes(32).toString("base64url")}
-function newTicket(user,game){const t=token();tickets.set(t,{user,game,expires:Date.now()+60000,used:false});return t}
-function consumeTicket(t){const x=tickets.get(t);if(!x||x.used||x.expires<Date.now())return null;x.used=true;tickets.delete(t);return x}
+function newTicket(user,game){const t=token();tickets.set(t,{user,game,expires:Date.now()+5*60*1000,used:false,connection:null});return t}
+function consumeTicket(t){
+  const x=tickets.get(t);
+  if(!x || x.expires<Date.now()) return null;
+  // A launch link can be invoked more than once by Chromium/Windows while
+  // handing a custom protocol to the registered application. Keep a redeemed
+  // ticket briefly usable instead of turning the second invocation into a
+  // confusing "expired" error.
+  if(x.used && x.connection){
+    const c=getConnection(x.connection);
+    if(c) return x;
+    tickets.delete(t); return null;
+  }
+  x.used=true;
+  return x;
+}
 function newConnection(t){const c=token();connections.set(c,{...t,expires:Date.now()+120000});return c}
 function getConnection(c){const x=connections.get(c);if(!x||x.expires<Date.now())return null;return x}
 
@@ -41,7 +55,14 @@ app.get("/api/games",(req,res)=>{const d=db();const online={};for(const [id,room
 app.post("/api/games",(req,res)=>{if(!req.session.user)return res.status(401).json({error:"Log in first."});const d=db(),u=d.users[req.session.user],name=String(req.body.name||"").trim();if(!name||name.length>50)return res.status(400).json({error:"Enter a game name."});const game={id:String(Date.now()),name,creator:u.username,players:0,visits:0,description:String(req.body.description||"").slice(0,180),featured:false};d.games.unshift(game);save(d);res.json({ok:true,game})});
 
 app.post("/api/client/launch",(req,res)=>{if(!req.session.user)return res.status(401).json({error:"Log in first."});const gameId=String(req.body.gameId||"");const d=db();const game=d.games.find(g=>g.id===gameId);if(!game)return res.status(404).json({error:"Game not found."});const ticket=newTicket(d.users[req.session.user],gameId);res.json({ok:true,scheme:`brickhill://play?game=${encodeURIComponent(gameId)}&ticket=${encodeURIComponent(ticket)}`,game:{id:game.id,name:game.name}})});
-app.post("/api/client/redeem",(req,res)=>{const t=consumeTicket(String(req.body.ticket||""));if(!t)return res.status(401).json({error:"Invalid or expired launch ticket."});const connection=newConnection(t);res.json({ok:true,user:t.user,gameId:t.game,ws:`wss://${req.get("host")}/ws/legacy?game=${encodeURIComponent(t.game)}&connection=${encodeURIComponent(connection)}`})});
+app.post("/api/client/redeem",(req,res)=>{
+  const ticket=String(req.body.ticket||"");
+  const t=consumeTicket(ticket);
+  if(!t)return res.status(401).json({error:"Invalid or expired launch ticket. Please return to Brick Hill and click Play again."});
+  const connection=t.connection && getConnection(t.connection) ? t.connection : newConnection(t);
+  t.connection=connection;
+  res.json({ok:true,user:t.user,gameId:t.game,ws:`wss://${req.get("host")}/ws/legacy?game=${encodeURIComponent(t.game)}&connection=${encodeURIComponent(connection)}`});
+});
 app.get("/api/client/installer",(req,res)=>{
   const installer=path.join(__dirname,"public","BrickHillInstaller.exe");
   if(!fs.existsSync(installer))return res.status(404).send("Installer unavailable.");
