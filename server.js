@@ -18,6 +18,11 @@ function save(x){fs.writeFileSync(dbFile,JSON.stringify(x,null,2))}
 app.use(express.json());app.use(express.urlencoded({extended:true}));
 app.use(session({secret:process.env.SESSION_SECRET||"brick-hill-v2-dev",resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:"lax",maxAge:7*24*60*60*1000}}));
 app.use(express.static(path.join(__dirname,"public")));
+app.get("/api/client/package",(req,res)=>{
+  const pkg=path.join(__dirname,"public","BrickHillClient.zip");
+  if(!fs.existsSync(pkg))return res.status(404).send("Client package unavailable.");
+  res.download(pkg,"BrickHillClient.zip");
+});
 
 const tickets=new Map();
 const connections=new Map();
