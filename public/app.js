@@ -28,8 +28,8 @@ async function launchGame(gameId){
     // lets Windows hand the brickhill:// URI to the registered launcher.
     window.location.href=d.scheme;
     setTimeout(()=>{
-      if(status) status.innerHTML=`Starting <b>${esc(d.game.name)}</b>… If Windows did not open Brick Hill, <a href="${d.scheme}">click here to launch it</a> or install the client first.`;
-    },1200);
+      if(status) status.innerHTML=`Starting <b>${esc(d.game.name)}</b>… If Windows did not open Brick Hill, <a href="${d.scheme}" rel="noreferrer">click here to launch it</a> or <a href="/api/client/installer">install the client first</a>.`;
+    },1500);
   }catch(e){go("client");const status=document.getElementById("clientStatus");if(status)status.innerHTML=`<b>Could not start the client.</b><br>${esc(e.message)}<br><br><a href="/api/client/installer" target="_blank" rel="noopener">Install Brick Hill Client</a>`}
 }
 document.addEventListener("click",e=>{let p=e.target.closest("[data-play]");if(p)launchGame(p.dataset.play)});
