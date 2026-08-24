@@ -5,7 +5,7 @@ $zip = Join-Path $env:TEMP "BrickHillClient.zip"
 
 Write-Host "Brick Hill Client Installer"
 Write-Host "Downloading client files..."
-Invoke-WebRequest -Uri "$base/BrickHillClient.zip" -OutFile $zip -UseBasicParsing
+Invoke-WebRequest -Uri "$base/api/client/package" -OutFile $zip -UseBasicParsing
 
 if (!(Test-Path $installDir)) { New-Item -ItemType Directory -Path $installDir -Force | Out-Null }
 Expand-Archive -Path $zip -DestinationPath $installDir -Force
@@ -31,4 +31,5 @@ Set-ItemProperty -Path "$protocol\shell\open\command" -Name "(Default)" -Value $
 Write-Host ""
 Write-Host "Brick Hill Client installed successfully."
 Write-Host "Installed to: $installDir"
+Write-Host "Protocol registered: brickhill://"
 Write-Host "You can now return to brickhill.onrender.com and press Play."
