@@ -84,7 +84,8 @@ app.get("/api/client/installer.exe",(req,res)=>{
   if(!fs.existsSync(installer))return res.status(404).send("Installer unavailable.");
   res.download(installer,"BrickHillInstaller.exe");
 });
-app.get("/health",(req,res)=>res.json({ok:true,version:"2.2.0",websocket:true,legacyBridge:true}));
+app.get("/health",(req,res)=>res.json({ok:true,version:"17.0.0",websocket:true,legacyBridge:true,mplayBroker:"foundation"}));
+app.get("/api/client/rooms",(req,res)=>{const out={};for(const [id,room] of rooms)out[id]={players:room.size};res.json(out)});
 
 const wss=new WebSocketServer({server,path:"/ws/legacy"});
 wss.on("connection",(ws,req)=>{

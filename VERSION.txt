@@ -1,1 +1,1 @@
-BrickHill Play Client v14 - user-activation-safe Play flow
+17.0.0-auto-join-foundation
