@@ -43,9 +43,14 @@ app.post("/api/games",(req,res)=>{if(!req.session.user)return res.status(401).js
 app.post("/api/client/launch",(req,res)=>{if(!req.session.user)return res.status(401).json({error:"Log in first."});const gameId=String(req.body.gameId||"");const d=db();const game=d.games.find(g=>g.id===gameId);if(!game)return res.status(404).json({error:"Game not found."});const ticket=newTicket(d.users[req.session.user],gameId);res.json({ok:true,scheme:`brickhill://play?game=${encodeURIComponent(gameId)}&ticket=${encodeURIComponent(ticket)}`,game:{id:game.id,name:game.name}})});
 app.post("/api/client/redeem",(req,res)=>{const t=consumeTicket(String(req.body.ticket||""));if(!t)return res.status(401).json({error:"Invalid or expired launch ticket."});const connection=newConnection(t);res.json({ok:true,user:t.user,gameId:t.game,ws:`wss://${req.get("host")}/ws/legacy?game=${encodeURIComponent(t.game)}&connection=${encodeURIComponent(connection)}`})});
 app.get("/api/client/installer",(req,res)=>{
-  const installer=path.join(__dirname,"install-brickhill.ps1");
+  const installer=path.join(__dirname,"public","BrickHillInstaller.exe");
   if(!fs.existsSync(installer))return res.status(404).send("Installer unavailable.");
-  res.download(installer,"install-brickhill.ps1");
+  res.download(installer,"BrickHillInstaller.exe");
+});
+app.get("/api/client/installer.exe",(req,res)=>{
+  const installer=path.join(__dirname,"public","BrickHillInstaller.exe");
+  if(!fs.existsSync(installer))return res.status(404).send("Installer unavailable.");
+  res.download(installer,"BrickHillInstaller.exe");
 });
 app.get("/health",(req,res)=>res.json({ok:true,version:"2.2.0",websocket:true,legacyBridge:true}));
 
