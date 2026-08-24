@@ -19,9 +19,17 @@ async function launchGame(gameId){
     go("client");
     const status=document.getElementById("clientStatus");
     if(status) status.textContent=`Starting ${d.game.name}…`;
-    // Registered by install-brickhill.ps1 on Windows. This starts the unchanged game EXE.
-    window.location.href=d.scheme;
-  }catch(e){go("client");const status=document.getElementById("clientStatus");if(status)status.textContent=e.message}
+    // The custom protocol only works after the Windows launcher has been installed.
+    // Keep the page visible so the user gets a useful message if Windows blocks it.
+    const status=document.getElementById("clientStatus");
+    if(status) status.innerHTML=`Starting <b>${esc(d.game.name)}</b>… If nothing opens, use <a href="/api/client/installer" target="_blank" rel="noopener">Install Brick Hill Client</a>, then click Play again.`;
+    const link=document.createElement("a");
+    link.href=d.scheme;
+    link.style.display="none";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(()=>link.remove(),1000);
+  }catch(e){go("client");const status=document.getElementById("clientStatus");if(status)status.innerHTML=`<b>Could not start the client.</b><br>${esc(e.message)}<br><br><a href="/api/client/installer" target="_blank" rel="noopener">Install Brick Hill Client</a>`}
 }
 document.addEventListener("click",e=>{let p=e.target.closest("[data-play]");if(p)launchGame(p.dataset.play)});
 async function refresh(){let d=await api("/api/me");me=d.user;renderAccount();loadHome();loadGames();loadProfile()}
