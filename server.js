@@ -54,6 +54,17 @@ app.post("/api/logout",(req,res)=>req.session.destroy(()=>res.json({ok:true})));
 app.get("/api/games",(req,res)=>{const d=db();const online={};for(const [id,room] of rooms)online[id]=room.size;res.json({games:d.games.map(g=>({...g,players:online[g.id]||0}))})});
 app.post("/api/games",(req,res)=>{if(!req.session.user)return res.status(401).json({error:"Log in first."});const d=db(),u=d.users[req.session.user],name=String(req.body.name||"").trim();if(!name||name.length>50)return res.status(400).json({error:"Enter a game name."});const game={id:String(Date.now()),name,creator:u.username,players:0,visits:0,description:String(req.body.description||"").slice(0,180),featured:false};d.games.unshift(game);save(d);res.json({ok:true,game})});
 
+app.get("/api/client/launch-url",(req,res)=>{
+  if(!req.session.user)return res.status(401).json({error:"Log in first."});
+  const gameId=String(req.query.gameId||"");
+  const d=db();
+  const game=d.games.find(g=>g.id===gameId);
+  if(!game)return res.status(404).json({error:"Game not found."});
+  const ticket=newTicket(d.users[req.session.user],gameId);
+  const scheme=`brickhill://play?game=${encodeURIComponent(gameId)}&ticket=${encodeURIComponent(ticket)}`;
+  // Return the scheme to the page so the final launch is a real anchor click.
+  res.json({ok:true,scheme,game:{id:game.id,name:game.name}});
+});
 app.post("/api/client/launch",(req,res)=>{if(!req.session.user)return res.status(401).json({error:"Log in first."});const gameId=String(req.body.gameId||"");const d=db();const game=d.games.find(g=>g.id===gameId);if(!game)return res.status(404).json({error:"Game not found."});const ticket=newTicket(d.users[req.session.user],gameId);res.json({ok:true,scheme:`brickhill://play?game=${encodeURIComponent(gameId)}&ticket=${encodeURIComponent(ticket)}`,game:{id:game.id,name:game.name}})});
 app.post("/api/client/redeem",(req,res)=>{
   const ticket=String(req.body.ticket||"");

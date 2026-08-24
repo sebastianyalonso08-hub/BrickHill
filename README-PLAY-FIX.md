@@ -1,11 +1,9 @@
-# Brick Hill Play Fix v12
+# BrickHill Play v14
 
-This build keeps `Brick_Hill_Multiplayer.exe` and `BRICK.dll` unchanged.
+The Play flow no longer tries to navigate to `brickhill://` from an async JavaScript callback.
+That can be blocked by Chromium/Edge because the original user activation has been lost.
 
-## Critical network fix
-The legacy `wsock32.dll` shim was rewriting the client's destination to `127.0.0.1:26137`, while the bridge listens on `127.0.0.1:6510`. v12 patches only those two port bytes in the shim so the unchanged client reaches the local bridge.
+Play now prepares a ticket over HTTPS and then displays a real `Launch <game>` anchor.
+The user click on that anchor directly opens `brickhill://play?...`, allowing Windows to hand it to BrickHillLauncher.
 
-## Selected game flow
-The website creates a launch ticket for the selected game. The launcher redeems it and starts the bridge with that game's connection context. The bridge connects to `/ws/legacy` with the selected game/connection, isolating traffic by website game room.
-
-The original client still speaks its legacy GameMaker `mplay` protocol. The bridge transports that TCP stream over WSS. Full in-game session creation/joining still requires the server to implement the exact legacy `mplay` handshake.
+After the launcher starts, the existing ticket redeem/bridge flow is unchanged.
