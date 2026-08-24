@@ -105,6 +105,18 @@ main{width:790px;margin:4px auto 20px}
 .game-card h3{font-size:12px;margin:1px 0 4px}
 .game-card p{margin:0;color:#666;font-size:10px;line-height:1.3}
 .game-card .play{align-self:center}
+
+.client-actions{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.tutorialbtn{border:1px solid #5d8eaf;background:linear-gradient(#eef7fc,#c8dce8);color:#24506c;font-weight:bold;font-size:10px;padding:5px 9px;cursor:pointer}
+.tutorialbtn:hover{background:linear-gradient(#fff,#d8e8f0)}
+.client-note{margin-top:8px;opacity:.7;font-size:12px}
+.tutorial-box{max-width:720px;margin:0 auto}
+.tutorial-intro{margin:0 0 12px;color:#444;line-height:1.45}
+.tutorial-steps{margin:0;padding-left:25px;color:#333;font-size:12px;line-height:1.5}
+.tutorial-steps li{margin:0 0 12px;padding-left:3px}
+.tutorial-steps code{background:#e8edf1;border:1px solid #c4cdd4;padding:1px 4px;font-family:monospace;font-size:11px}
+.tutorial-tip{margin-top:14px;padding:9px;background:#fff8d7;border:1px solid #d8c56a;color:#5d521c;font-size:11px;line-height:1.45}
+.tutorial-actions{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}
 .playbtn{
   border:1px solid #3e8b24;background:linear-gradient(#7ed84c,#48a226);
   color:#fff;font-weight:bold;font-size:10px;padding:4px 6px;text-shadow:0 1px #39741e;

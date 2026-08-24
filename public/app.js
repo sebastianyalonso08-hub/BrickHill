@@ -1,7 +1,9 @@
 let me=null;
 const pages=[...document.querySelectorAll(".page")];
 function go(id){pages.forEach(p=>p.classList.toggle("active",p.id===id));window.scrollTo(0,0);if(id==="games")loadGames();if(id==="home")loadHome();if(id==="profile")loadProfile()}
-document.addEventListener("click",e=>{let b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});
+document.addEventListener("click",e=>{let b=e.target.closest("[data-page]");if(b){e.preventDefault();go(b.dataset.page)}});
+const tutorialButton=document.getElementById("openTutorial");
+if(tutorialButton)tutorialButton.onclick=()=>go("tutorial");
 async function api(url,opt){let r=await fetch(url,opt),d=await r.json();if(!r.ok)throw Error(d.error||"Request failed");return d}
 function esc(x){return String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderAccount(){document.getElementById("logoutTop").style.display=me?"block":"none";document.getElementById("welcomeName").textContent=me?me.username:"Guest";document.getElementById("homeUser").textContent=me?me.username:"Guest";document.getElementById("homeBricks").textContent=me?me.bricks:0;document.getElementById("miniUser").innerHTML=me?`<b>${esc(me.username)}</b><div class="coins">🧱 ${me.bricks}　★ 0</div>`:"<b>Welcome!</b><div class='coins'>🧱 0　★ 0</div>"}
@@ -18,13 +20,11 @@ async function launchGame(gameId){
     const d=await api("/api/client/launch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gameId})});
     go("client");
     const status=document.getElementById("clientStatus");
-    if(status) status.textContent=`Starting ${d.game.name}…`;
     // The custom protocol only works after the Windows launcher has been installed.
-    // Keep the page visible so the user gets a useful message if Windows blocks it.
-    const status=document.getElementById("clientStatus");
     if(status) status.innerHTML=`Starting <b>${esc(d.game.name)}</b>… If nothing opens, use <a href="/api/client/installer" target="_blank" rel="noopener">Install Brick Hill Client</a>, then click Play again.`;
     const link=document.createElement("a");
     link.href=d.scheme;
+    link.setAttribute("aria-hidden","true");
     link.style.display="none";
     document.body.appendChild(link);
     link.click();
