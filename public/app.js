@@ -16,22 +16,26 @@ document.getElementById("logoutTop").onclick=async()=>{await api("/api/logout",{
 document.getElementById("publish").onclick=async()=>{try{await api("/api/games",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:document.getElementById("gameName").value,description:document.getElementById("gameDesc").value})});document.getElementById("gameName").value="";document.getElementById("gameDesc").value="";loadGames()}catch(e){document.getElementById("gameError").textContent=e.message}}
 async function launchGame(gameId){
   if(!me){go("login");return}
+  go("client");
+  const status=document.getElementById("clientStatus");
+  if(status) status.innerHTML=`Preparing <b>Brick Hill</b>…`;
   try{
-    const d=await api("/api/client/launch",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gameId})});
-    go("client");
-    const status=document.getElementById("clientStatus");
-    // The custom protocol only works after the Windows launcher has been installed.
-    if(status) status.innerHTML=`Starting <b>${esc(d.game.name)}</b>… If nothing opens, use <a href="/api/client/installer" target="_blank" rel="noopener">Install Brick Hill Client</a>, then click Play again.`;
-    // Navigate the top-level browser window to the custom protocol.
-    // A hidden anchor click is commonly blocked by Chromium/Edge as a
-    // programmatic external-protocol navigation. Top-level navigation
-    // lets Windows hand the brickhill:// URI to the registered launcher.
-    window.location.href=d.scheme;
-    setTimeout(()=>{
-      if(status) status.innerHTML=`Starting <b>${esc(d.game.name)}</b>… If Windows did not open Brick Hill, <a href="${d.scheme}" rel="noreferrer">click here to launch it</a> or <a href="/api/client/installer">install the client first</a>.`;
-    },1500);
-  }catch(e){go("client");const status=document.getElementById("clientStatus");if(status)status.innerHTML=`<b>Could not start the client.</b><br>${esc(e.message)}<br><br><a href="/api/client/installer" target="_blank" rel="noopener">Install Brick Hill Client</a>`}
+    // Do NOT navigate to brickhill:// from inside an async callback. Chromium/Edge
+    // can reject custom protocols when the original user activation has been lost.
+    // Instead, turn the Play action into a real user-clicked HTTPS navigation.
+    const r=await fetch(`/api/client/launch-url?gameId=${encodeURIComponent(gameId)}`,{credentials:"same-origin"});
+    if(!r.ok){let d={};try{d=await r.json()}catch{};throw Error(d.error||"Could not prepare the client.")}
+    const d=await r.json();
+    if(status) status.innerHTML=`<a class="playbtn launch-now" href="${esc(d.scheme)}">Launch <b>${esc(d.game.name)}</b></a><p>If Windows does not open Brick Hill, click the button once more.</p>`;
+    // Keep a real anchor as the final action. The click is user initiated and
+    // Windows can hand the brickhill:// URI to the registered launcher.
+    const a=status?.querySelector("a.launch-now");
+    if(a){a.addEventListener("click",()=>{if(status)status.innerHTML=`Starting <b>${esc(d.game.name)}</b>…`},{once:true})}
+  }catch(e){
+    if(status)status.innerHTML=`<b>Could not prepare the client.</b><br>${esc(e.message)}<br><br><a href="/api/client/installer">Install Brick Hill Client</a>`
+  }
 }
+
 document.addEventListener("click",e=>{let p=e.target.closest("[data-play]");if(p)launchGame(p.dataset.play)});
 async function refresh(){let d=await api("/api/me");me=d.user;renderAccount();loadHome();loadGames();loadProfile()}
 refresh();
